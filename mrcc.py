@@ -15,7 +15,9 @@ class CCJob(MRJob):
     Override process_record with your mapper
     """
     raise NotImplementedError('Process record needs to be customized')
-
+  def configure_options(self):
+                super(CCJob, self).configure_options()
+                self.add_passthrough_option('--keyword', default="buddha,Jesus,helicopter", type="string")
   def mapper(self, _, line):
     f = None
     ## If we're on EC2 or running on a Hadoop cluster, pull files via S3
@@ -33,7 +35,7 @@ class CCJob(MRJob):
     ###
     counter =0
     for i, record in enumerate(f):
-      for key, value in self.process_record(record):
+      for key, value in self.process_record(record, self.options.keyword):
          yield key, value
          counter += value
       self.increment_counter('commoncrawl', 'processed_records', 1)
